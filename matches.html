@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manchester City FC - Розклад матчів</title>
+    <link rel="stylesheet" href="stylem.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <style>
+        /* Стилі для загрузочного екрану */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #7ac6e8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loader img {
+            width: 100px;
+            animation: pulse 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        main {
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        /* Додаткові стилі для сторінки матчів */
+        .matches-page {
+            background-color: #f8f9fa;
+            padding: 30px 0;
+            min-height: calc(100vh - 160px);
+        }
+        
+        .matches-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .main-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1f235a;
+            font-size: 2.5rem;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.6s ease;
+        }
+        
+        .match-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .match-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border-top: 4px solid #7ac6e8;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        
+        .match-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }
+        
+        .match-card.next-match {
+            border-top-color: #1f235a;
+            position: relative;
+        }
+        
+        .match-card.next-match::before {
+            content: "НАСТУПНИЙ МАТЧ";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #1f235a;
+            color: white;
+            padding: 3px 10px;
+            font-size: 0.8rem;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .match-header {
+            padding: 15px;
+            background: rgba(122, 198, 232, 0.1);
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .competition {
+            font-weight: bold;
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .match-date {
+            font-weight: bold;
+            color: #343a40;
+            font-size: 1.1rem;
+        }
+        
+        .match-content {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 35%;
+        }
+        
+        .team-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        
+        .team-name {
+            font-weight: bold;
+            text-align: center;
+            color: #1f235a;
+            font-size: 0.95rem;
+        }
+        
+        .match-center {
+            width: 30%;
+            text-align: center;
+        }
+        
+        .match-time {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #7ac6e8;
+            margin-bottom: 5px;
+        }
+        
+        .match-vs {
+            font-size: 0.8rem;
+            color: #6c757d;
+            font-weight: bold;
+        }
+        
+        .match-status {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        /* Адаптація для мобільних */
+        @media (max-width: 768px) {
+            .match-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-title {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Стилі для фільтрів */
+        .match-filters {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease 0.2s;
+        }
+        
+        .filter-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: #7ac6e8;
+            color: white;
+            border-color: #7ac6e8;
+        }
+
+        /* Кнопка "Вгору" */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: #7ac6e8;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 99;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .scroll-top.visible {
+            opacity: 1;
+        }
+        
+        .scroll-top:hover {
+            background: #5aa6c8;
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Загрузочний екран -->
+    <div class="loader">
+        <img src="images/pngegg.png" alt="Loading">
+    </div>
+
+    <header>
+        <div class="logo">
+            <a href="index.html"><img src="images/pngegg.png" alt="Manchester City FC Logo"></a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Головна</a></li>
+                <li><a href="news.html">Новини</a></li>
+                <li><a href="matches.html">Розклад матчів</a></li>
+                <li><a href="contacts.html">Контакти</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="matches-page">
+        <h1 class="oswald-bold main-title">Розклад матчів</h1>
+        
+        <div class="match-filters">
+            <button class="filter-btn active" data-filter="all">Всі матчі</button>
+            <button class="filter-btn" data-filter="premier">Прем'єр-ліга</button>
+            <button class="filter-btn" data-filter="champions">Ліга чемпіонів</button>
+            <button class="filter-btn" data-filter="home">Домашні</button>
+            <button class="filter-btn" data-filter="away">Виїзні</button>
+        </div>
+        
+        <div class="matches-container">
+            <div class="match-grid" id="matchesList">
+                <!-- Матчі будуть додаватись через jQuery -->
+            </div>
+        </div>
+    </main>
+    <!-- Кнопка "Вгору" -->
+    <div class="scroll-top">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+            <path d="M12 2l-8 8h5v10h6V10h5z"/>
+        </svg>
+    </div>
+
+    <footer class="footer">
+        <a href="contacts.html" class="footer-link">© Kudinov Matvii</a>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        // Приховуємо лоадер і показуємо контент
+        setTimeout(function() {
+            $('.loader').fadeOut(500, function() {
+                $('main').css('display', 'block').animate({opacity: 1}, 800, function() {
+                    // Показуємо елементи з анімацією
+                    $('.main-title').css({
+                        'opacity': 1,
+                        'transform': 'translateY(0)'
+                    });
+                    
+                    $('.match-filters').css({
+                        'opacity': 1,
+                        'transform': 'translateY(0)'
+                    });
+                    
+                    loadMatches();
+                });
+            });
+        }, 1500);
+
+        // Дані про матчі
+        const matchesData = [
+            {
+                id: 1,
+                date: "Середа, 11 грудня",
+                competition: "Ліга Чемпіонів",
+                homeTeam: { name: "Juventus", logo: "images/juventus.png" },
+                awayTeam: { name: "Man City", logo: "images/manchester.png" },
+                time: "21:00",
+                isNext: true,
+                type: "champions",
+                location: "away"
+            },
+            {
+                id: 2,
+                date: "Неділя, 15 грудня",
+                competition: "Англійська Прем'єр-ліга",
+                homeTeam: { name: "MU", logo: "images/mu.png" },
+                awayTeam: { name: "Man City", logo: "images/manchester.png" },
+                time: "17:30",
+                isNext: false,
+                type: "premier",
+                location: "away"
+            },
+            {
+                id: 3,
+                date: "Субота, 21 грудня",
+                competition: "Англійська Прем'єр-ліга",
+                homeTeam: { name: "Man City", logo: "images/manchester.png" },
+                awayTeam: { name: "Aston Villa", logo: "images/ast.png" },
+                time: "13:30",
+                isNext: false,
+                type: "premier",
+                location: "home"
+            },
+            // Додайте інші матчі за аналогією
+        ];
+        // Функція для завантаження матчів
+        function loadMatches() {
+            const $matchesList = $('#matchesList');
+            $matchesList.empty();
+            
+            matchesData.forEach((match, index) => {
+                const isHomeGame = match.location === "home";
+                const homeTeam = isHomeGame ? match.homeTeam : match.awayTeam;
+                const awayTeam = isHomeGame ? match.awayTeam : match.homeTeam;
+                
+                const matchCard = `
+                    <div class="match-card ${match.isNext ? 'next-match' : ''} ${match.type}" 
+                         data-id="${match.id}" data-type="${match.type}" data-location="${match.location}"
+                         style="animation-delay: ${index * 0.1}s">
+                        <div class="match-header">
+                            <div class="competition">${match.competition}</div>
+                            <div class="match-date">${match.date}</div>
+                        </div>
+                        <div class="match-content">
+                            <div class="team">
+                                <img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo">
+                                <div class="team-name">${homeTeam.name}</div>
+                            </div>
+                            <div class="match-center">
+                                <div class="match-time">${match.time}</div>
+                                <div class="match-vs">vs</div>
+                            </div>
+                            <div class="team">
+                                <img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo">
+                                <div class="team-name">${awayTeam.name}</div>
+                            </div>
+                        </div>
+                        <div class="match-status">
+                            ${isHomeGame ? 'Домашній матч' : 'Виїзний матч'}
+                        </div>
+                    </div>
+                `;
+                
+                $matchesList.append(matchCard);
+                
+                // Анімуємо появу картки
+                setTimeout(function() {
+                    $(`.match-card[data-id="${match.id}"]`).css({
+    'opacity': 1,
+    'transform': 'translateY(0)'
+});
+                }, index * 100 + 300);
+            });
+        }
+
+        // Фільтрація матчів
+        $('.filter-btn').click(function() {
+    const filter = $(this).data('filter');
+    
+    $('.filter-btn').removeClass('active');
+    $(this).addClass('active');
+    
+    if (filter === 'all') {
+        $('.match-card').show();
+    } else if (filter === 'home' || filter === 'away') {
+        $('.match-card').hide();
+        $(`.match-card[data-location="${filter}"]`).show();
+    } else {
+        $('.match-card').hide();
+        $(`.match-card[data-type="${filter}"]`).show();
+    }
+});
+
+        // Плавний скрол для навігації
+        $('a[href*="#"]').on('click', function(e) {
+            if ($(this.hash).length) {
+                e.preventDefault();
+                $('html, body').animate({
+                    scrollTop: $(this.hash).offset().top - 20
+                }, 800);
+            }
+        });
+
+        // Підсвітка активної сторінки
+        $('nav a').removeClass('active');
+        $('nav a[href="matches.html"]').addClass('active');
+
+        // Кнопка "Вгору"
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 300) {
+                $('.scroll-top').addClass('visible');
+            } else {
+                $('.scroll-top').removeClass('visible');
+            }
+        });
+        
+        $('.scroll-top').click(function() {
+            $('html, body').animate({scrollTop: 0}, 600);
+            return false;
+        });
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новини - Manchester City FC</title>
+    <link rel="stylesheet" href="stylenews.css">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <style>
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #7ac6e8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .loader img {
+            width: 100px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        main {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader">
+        <img src="images/pngegg.png" alt="Loading">
+    </div>
+
+    <header>
+        <div class="logo">
+            <a href="index.html"><img src="images/pngegg.png" alt="Manchester City FC Logo"></a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Головна</a></li>
+                <li><a href="news.html" class="active">Новини</a></li>
+                <li><a href="matches.html">Розклад матчів</a></li>
+                <li><a href="contacts.html">Контакти</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1 class="news-title">Новини</h1>
+
+        <section class="news-vertical">
+            <div class="news-container">
+                <article class="news-item">
+                    <a href="https://www.youtube.com/watch?v=TBzGVbRl-58" class="news-link">
+                        <div class="news-content">
+                            <img src="images/pepinterw.png" alt="News Image 1" class="news-image">
+                            <span class="news-text">Дивіться: реакція Гвардіоли на нічию Крістал Пелас</span>
+                        </div>
+                    </a>
+                </article>
+                <article class="news-item">
+                    <a href="new1.html" class="news-link">
+                        <div class="news-content">
+                            <img src="images/helps.png" alt="News Image 2" class="news-image">
+                            <span class="news-text">Як City Football Academy допомогла CITC ставати все сильнішим</span>
+                        </div>
+                    </a>
+                </article>
+                <article class="news-item">
+                    <a href="new2.html" class="news-link">
+                        <div class="news-content">
+                            <img src="images/top10momenntssssss.png" alt="News Image 3" class="news-image">
+                            <span class="news-text">10 найкращих моментів за 10 років у City Football Academy</span>
+                        </div>
+                    </a>
+                </article>
+            </div>
+        
+            <div class="match-info">
+                <div class="next-match">
+                    <div class="header">Наступні Матчі</div>
+                    <div class="match-details">
+                        <div class="date">Середа 11 грудня<br>Ліга Чемпіонів</div>
+                        <div class="teams">
+                            <div class="team">
+                                <img src="images/juventus.png" alt="Juventus Logo">
+                                <div class="team-name">Juventus</div>
+                            </div>
+                            <div class="time">20:00 GMT</div>
+                            <div class="team">
+                                <img src="images/manchester.png" alt="Man City Logo">
+                                <div class="team-name">Man City</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <a href="contacts.html" class="footer-link">© Kudinov Matvii</a>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            $('.loader').fadeOut(500, function() {
+                $('main').fadeIn(800, function() {
+                    $(this).css('opacity', '1');
+                    $('.news-title').hide().fadeIn(1000);
+                    $('.news-item').each(function(i) {
+                        $(this).delay(i * 200).css({
+                            'opacity': 0,
+                            'transform': 'translateY(20px)'
+                        }).animate({
+                            'opacity': 1,
+                            'transform': 'translateY(0)'
+                        }, 600);
+                    });
+                    $('.next-match').css({
+                        'opacity': 0,
+                        'transform': 'scale(0.9)'
+                    }).delay(800).animate({
+                        'opacity': 1,
+                        'transform': 'scale(1)'
+                    }, 600);
+                });
+            });
+        }, 1500);
+    });
+    </script>
+</body>
+</html>

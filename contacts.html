@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manchester City FC</title>
+    <link rel="stylesheet" href="stylec.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@200..700&display=swap" rel="stylesheet">
+    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <style>
+        /* Додаткові стилі для jQuery */
+        .form-success {
+            display: none;
+            background-color: #51cf66;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px auto;
+            text-align: center;
+            max-width: 500px;
+            animation: fadeIn 0.5s;
+        }
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin: -10px 0 10px;
+            display: none;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+            color: #1f235a;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .smooth-hover {
+            transition: all 0.3s ease;
+        }
+        #commentsSection {
+  margin-top: 40px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+}
+.comment {
+  background: white;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.comment small {
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="index.html"><img src="images/pngegg.png" alt="Manchester City FC Logo" class="smooth-hover"></a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Головна</a></li>
+                <li><a href="news.html">Новини</a></li>
+                <li><a href="matches.html">Розклад матчів</a></li>
+                <li><a href="contacts.html">Контакти</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>Контакти</h1>
+        <section class="about-me">
+            <div class="image-container">
+                <img src="images/IMG_9221.png" alt="Матвій Кудінов" class="my-photo smooth-hover">
+            </div>
+            <div class="text-content">
+                <h2>Привіт! Мене звати Матвій, я фанат Manchester City</h2>
+                <h3>Про мене</h3>
+                <p>Моє повне ім'я Матвій Кудінов, мені 18 років. Створюючи цей сайт, я покращував свої навички в програмуванні.</p>
+    
+                <h3>Контакти:</h3>
+                <ul class="contact-list">
+                    <li><i class="icon-email"></i> Email: matvii@gmail.com</li>
+                    <li><i class="icon-phone"></i> Телефон: +38(096) 400 3049</li>
+                </ul>
+    
+                <h3>Напишіть мені</h3>
+                <form id="feedbackForm" action="#" method="post">
+                    <div class="form-group">
+                        <label for="name">Ваше ім'я:</label>
+                        <input type="text" id="name" name="name" class="form-input">
+                        <div class="error-message" id="nameError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Ваш email:</label>
+                        <input type="email" id="email" name="email" class="form-input">
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Ваше повідомлення:</label>
+                        <textarea id="message" name="message" class="form-input"></textarea>
+                        <div class="error-message" id="messageError"></div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <div class="loading">Відправка... <div class="spinner"></div></div>
+                        <button type="submit" id="submitBtn" class="btn-submit">Надіслати</button>
+                    </div>
+                </form>
+                <div id="successMessage" class="form-success"></div>
+            </div>
+        </section>
+        <section id="commentsSection">
+  <h3>Фан-коментарі</h3>
+  <div id="commentsList"></div>
+</section>
+    </main>
+
+    <footer class="footer">
+        <a href="contacts.html" class="footer-link smooth-hover">© Kudinov Matvii</a>
+    </footer>
+
+    <!-- Підключаємо jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        // 1. Плавний скролл
+        $('a[href*="#"]').on('click', function(e) {
+            if ($(this.hash).length) {
+                e.preventDefault();
+                $('html, body').animate({
+                    scrollTop: $(this.hash).offset().top - 70
+                }, 800);
+            }
+        });
+
+        // 2. Видалено підсвітку активної сторінки
+
+        // 3. Ефекти при наведенні
+        $('.smooth-hover').hover(
+            function() { $(this).css('transform', 'scale(1.05)'); },
+            function() { $(this).css('transform', 'scale(1)'); }
+        );
+
+        // 4. Робота з формою
+        $('#feedbackForm').submit(function(e) {
+  e.preventDefault();
+  let valid = true;
+
+  // Валидация (оставляем как было)
+  if (!$('#name').val().trim()) {
+    $('#nameError').text('Будь ласка, введіть ім\'я').show();
+    valid = false;
+  }
+  const email = $('#email').val().trim();
+  if (!email) {
+    $('#emailError').text('Будь ласка, введіть email').show();
+    valid = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    $('#emailError').text('Введіть коректний email').show();
+    valid = false;
+  }
+  if (!$('#message').val().trim()) {
+    $('#messageError').text('Будь ласка, введіть повідомлення').show();
+    valid = false;
+  }
+
+  if (valid) {
+    $('.loading').show();
+    $('#submitBtn').prop('disabled', true);
+
+    // Отправка в Firestore
+    db.collection("comments").add({
+      name: $('#name').val().trim(),
+      email: email,
+      message: $('#message').val().trim(),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp() // Автоматическая дата
+    })
+    .then(() => {
+      $('.loading').hide();
+      $('#feedbackForm').slideUp(300);
+      $('#successMessage')
+        .html('<strong>Дякуємо!</strong> Ваш коментар успішно додано!')
+        .slideDown(300);
+      $('#feedbackForm')[0].reset();
+      $('#submitBtn').prop('disabled', false);
+      loadComments(); // Обновляем список комментов
+    })
+    .catch((error) => {
+      console.error("Помилка: ", error);
+      $('#successMessage')
+        .html('<strong>Помилка!</strong> Спробуйте ще раз пізніше.')
+        .show();
+    });
+  }
+});
+
+        // 5. Додаткові ефекти
+        $('.my-photo').on('click', function() {
+            $(this).toggleClass('zoom');
+        });
+
+        // 6. Анімація заголовка
+        $('h1').hide().fadeIn(1000);
+    });
+    function loadComments() {
+  db.collection("comments")
+    .orderBy("timestamp", "desc") // Сортировка от новых к старым
+    .get()
+    .then((querySnapshot) => {
+      let commentsHTML = "";
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        commentsHTML += `
+          <div class="comment">
+            <strong>${data.name}</strong>
+            <p>${data.message}</p>
+            <small>${data.timestamp?.toDate().toLocaleString() || "сьогодні"}</small>
+          </div>
+        `;
+      });
+      $('#commentsList').html(commentsHTML || "<p>Ще немає коментарів. Будьте першим!</p>");
+    });
+}
+
+// Загружаем комменты при загрузке страницы
+$(document).ready(function() {
+  loadComments();
+});
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+  // Ваш конфіг Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDeu_gOe05cR8o0lCu48UPm-ejfAFjs48Q",
+    authDomain: "mancity-fan-site-b0833.firebaseapp.com",
+    projectId: "mancity-fan-site-b0833",
+    storageBucket: "mancity-fan-site-b0833.appspot.com",  // Виправлено (без .firebasestorage)
+    messagingSenderId: "617244974554",
+    appId: "1:617244974554:web:9640979ae18e4f5139f4e3"
+  };
+
+  // Ініціалізація Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();  // Доступ до Firestore
+</script>
+</body>
+</html>
