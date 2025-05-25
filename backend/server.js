@@ -4,7 +4,7 @@ const cors = require('cors');
 const app = express();
 
 // Підключення до MongoDB Atlas
-const mongoURI = 'mongodb+srv://mancity_user:mancity_user1@clustername.mongodb.net/ManchesterCityDB?retryWrites=true&w=majority';
+const mongoURI = 'mongodb+srv://mancity_user:mancity_user1@manchestercitydb.oxk6m5e.mongodb.net/ManchesterCityDB?retryWrites=true&w=majority&appName=ManchesterCityDB';
 
 mongoose.connect(mongoURI)
   .then(() => console.log('Підключено до MongoDB Atlas'))
