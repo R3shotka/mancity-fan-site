@@ -132,132 +132,132 @@
 
     <!-- Підключаємо jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-    // 1. Плавний скролл
-    $('a[href*="#"]').on('click', function(e) {
-        if ($(this.hash).length) {
+    <script>
+    $(document).ready(function() {
+        // Плавний скролл (залишаємо без змін)
+        $('a[href*="#"]').on('click', function(e) {
+            if ($(this.hash).length) {
+                e.preventDefault();
+                $('html, body').animate({
+                    scrollTop: $(this.hash).offset().top - 70
+                }, 800);
+            }
+        });
+
+        // Ефекти при наведенні (залишаємо без змін)
+        $('.smooth-hover').hover(
+            function() { $(this).css('transform', 'scale(1.05)'); },
+            function() { $(this).css('transform', 'scale(1)'); }
+        );
+
+        // Оновлена робота з формою
+        $('#feedbackForm').submit(function(e) {
             e.preventDefault();
-            $('html, body').animate({
-                scrollTop: $(this.hash).offset().top - 70
-            }, 800);
-        }
-    });
+            let valid = true;
 
-    // 3. Ефекти при наведенні
-    $('.smooth-hover').hover(
-        function() { $(this).css('transform', 'scale(1.05)'); },
-        function() { $(this).css('transform', 'scale(1)'); }
-    );
+            // Валідація (залишаємо як було)
+            if (!$('#name').val().trim()) {
+                $('#nameError').text('Будь ласка, введіть ім\'я').show();
+                valid = false;
+            }
+            const email = $('#email').val().trim();
+            if (!email) {
+                $('#emailError').text('Будь ласка, введіть email').show();
+                valid = false;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                $('#emailError').text('Введіть коректний email').show();
+                valid = false;
+            }
+            if (!$('#message').val().trim()) {
+                $('#messageError').text('Будь ласка, введіть повідомлення').show();
+                valid = false;
+            }
 
-    // 4. Робота з формою (ОНОВЛЕНО)
-    $('#feedbackForm').submit(function(e) {
-        e.preventDefault();
-        let valid = true;
+            if (valid) {
+                $('.loading').show();
+                $('#submitBtn').prop('disabled', true);
 
-        // Валідація (залишаємо як було)
-        if (!$('#name').val().trim()) {
-            $('#nameError').text('Будь ласка, введіть ім\'я').show();
-            valid = false;
-        }
-        const email = $('#email').val().trim();
-        if (!email) {
-            $('#emailError').text('Будь ласка, введіть email').show();
-            valid = false;
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            $('#emailError').text('Введіть коректний email').show();
-            valid = false;
-        }
-        if (!$('#message').val().trim()) {
-            $('#messageError').text('Будь ласка, введіть повідомлення').show();
-            valid = false;
-        }
-
-        if (valid) {
-            $('.loading').show();
-            $('#submitBtn').prop('disabled', true);
-
-            // ВІДПРАВКА НА НОВИЙ API (замість Firebase)
-            fetch("http://localhost:3000/api/comments", {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json" 
-                },
-                body: JSON.stringify({
-                    name: $('#name').val().trim(),
-                    email: email,
-                    message: $('#message').val().trim()
+                // Оновлений URL для Render
+                fetch("https://mancity-fan-site.onrender.com/api/comments", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json" 
+                    },
+                    body: JSON.stringify({
+                        name: $('#name').val().trim(),
+                        email: email,
+                        message: $('#message').val().trim()
+                    })
                 })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error("Помилка сервера");
-                return response.json();
-            })
-            .then(() => {
-                $('.loading').hide();
-                $('#feedbackForm').slideUp(300);
-                $('#successMessage')
-                    .html('<strong>Дякуємо!</strong> Ваш коментар успішно додано!')
-                    .slideDown(300);
-                $('#feedbackForm')[0].reset();
-                $('#submitBtn').prop('disabled', false);
-                loadComments(); // Оновлюємо коментарі
-            })
-            .catch((error) => {
-                console.error("Помилка: ", error);
-                $('.loading').hide();
-                $('#successMessage')
-                    .html('<strong>Помилка!</strong> Спробуйте ще раз пізніше.')
-                    .show();
-                $('#submitBtn').prop('disabled', false);
-            });
-        }
-    });
-
-    // 5. Додаткові ефекти
-    $('.my-photo').on('click', function() {
-        $(this).toggleClass('zoom');
-    });
-
-    // 6. Анімація заголовка
-    $('h1').hide().fadeIn(1000);
-});
-
-// НОВА ФУНКЦІЯ ДЛЯ ЗАВАНТАЖЕННЯ КОМЕНТАРІВ З API
-function loadComments() {
-    fetch("http://localhost:3000/api/comments")
-        .then(response => {
-            if (!response.ok) throw new Error("Помилка завантаження");
-            return response.json();
-        })
-        .then(comments => {
-            let commentsHTML = "";
-            if (comments.length === 0) {
-                commentsHTML = "<p>Ще немає коментарів. Будьте першим!</p>";
-            } else {
-                comments.forEach(comment => {
-                    commentsHTML += `
-                        <div class="comment">
-                            <strong>${comment.name}</strong>
-                            <p>${comment.message}</p>
-                            <small>${new Date(comment.timestamp).toLocaleString('uk-UA')}</small>
-                        </div>
-                    `;
+                .then(response => {
+                    if (!response.ok) throw new Error("Помилка сервера");
+                    return response.json();
+                })
+                .then(() => {
+                    $('.loading').hide();
+                    $('#feedbackForm').slideUp(300);
+                    $('#successMessage')
+                        .html('<strong>Дякуємо!</strong> Ваш коментар успішно додано!')
+                        .slideDown(300);
+                    $('#feedbackForm')[0].reset();
+                    $('#submitBtn').prop('disabled', false);
+                    loadComments();
+                })
+                .catch((error) => {
+                    console.error("Помилка: ", error);
+                    $('.loading').hide();
+                    $('#successMessage')
+                        .html('<strong>Помилка!</strong> Спробуйте ще раз пізніше.')
+                        .show();
+                    $('#submitBtn').prop('disabled', false);
                 });
             }
-            $('#commentsList').html(commentsHTML);
-        })
-        .catch(error => {
-            console.error("Помилка завантаження коментарів:", error);
-            $('#commentsList').html("<p>Не вдалося завантажити коментарі. Спробуйте оновити сторінку.</p>");
         });
-}
 
-// Завантажуємо коментарі при завантаженні сторінки
-$(document).ready(function() {
-    loadComments();
-});
-</script>
+        // Додаткові ефекти (залишаємо без змін)
+        $('.my-photo').on('click', function() {
+            $(this).toggleClass('zoom');
+        });
+
+        // Анімація заголовка (залишаємо без змін)
+        $('h1').hide().fadeIn(1000);
+    });
+
+    // Оновлена функція для завантаження коментарів
+    function loadComments() {
+        fetch("https://mancity-fan-site.onrender.com/api/comments")
+            .then(response => {
+                if (!response.ok) throw new Error("Помилка завантаження");
+                return response.json();
+            })
+            .then(comments => {
+                let commentsHTML = "";
+                if (comments.length === 0) {
+                    commentsHTML = "<p>Ще немає коментарів. Будьте першим!</p>";
+                } else {
+                    comments.forEach(comment => {
+                        commentsHTML += `
+                            <div class="comment">
+                                <strong>${comment.name}</strong>
+                                <p>${comment.message}</p>
+                                <small>${new Date(comment.timestamp).toLocaleString('uk-UA')}</small>
+                            </div>
+                        `;
+                    });
+                }
+                $('#commentsList').html(commentsHTML);
+            })
+            .catch(error => {
+                console.error("Помилка завантаження коментарів:", error);
+                $('#commentsList').html("<p>Не вдалося завантажити коментарі. Спробуйте оновити сторінку.</p>");
+            });
+    }
+
+    // Завантажуємо коментарі при завантаженні сторінки
+    $(document).ready(function() {
+        loadComments();
+    });
+    </script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
