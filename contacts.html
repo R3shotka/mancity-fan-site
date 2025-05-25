@@ -132,129 +132,135 @@
 
     <!-- Підключаємо jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-    $(document).ready(function() {
-        // 1. Плавний скролл
-        $('a[href*="#"]').on('click', function(e) {
-            if ($(this.hash).length) {
-                e.preventDefault();
-                $('html, body').animate({
-                    scrollTop: $(this.hash).offset().top - 70
-                }, 800);
-            }
-        });
-
-        // 2. Видалено підсвітку активної сторінки
-
-        // 3. Ефекти при наведенні
-        $('.smooth-hover').hover(
-            function() { $(this).css('transform', 'scale(1.05)'); },
-            function() { $(this).css('transform', 'scale(1)'); }
-        );
-
-        // 4. Робота з формою
-        $('#feedbackForm').submit(function(e) {
-  e.preventDefault();
-  let valid = true;
-
-  // Валидация (оставляем как было)
-  if (!$('#name').val().trim()) {
-    $('#nameError').text('Будь ласка, введіть ім\'я').show();
-    valid = false;
-  }
-  const email = $('#email').val().trim();
-  if (!email) {
-    $('#emailError').text('Будь ласка, введіть email').show();
-    valid = false;
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    $('#emailError').text('Введіть коректний email').show();
-    valid = false;
-  }
-  if (!$('#message').val().trim()) {
-    $('#messageError').text('Будь ласка, введіть повідомлення').show();
-    valid = false;
-  }
-
-  if (valid) {
-    $('.loading').show();
-    $('#submitBtn').prop('disabled', true);
-
-    // Отправка в Firestore
-    db.collection("comments").add({
-      name: $('#name').val().trim(),
-      email: email,
-      message: $('#message').val().trim(),
-      timestamp: firebase.firestore.FieldValue.serverTimestamp() // Автоматическая дата
-    })
-    .then(() => {
-      $('.loading').hide();
-      $('#feedbackForm').slideUp(300);
-      $('#successMessage')
-        .html('<strong>Дякуємо!</strong> Ваш коментар успішно додано!')
-        .slideDown(300);
-      $('#feedbackForm')[0].reset();
-      $('#submitBtn').prop('disabled', false);
-      loadComments(); // Обновляем список комментов
-    })
-    .catch((error) => {
-      console.error("Помилка: ", error);
-      $('#successMessage')
-        .html('<strong>Помилка!</strong> Спробуйте ще раз пізніше.')
-        .show();
+<script>
+$(document).ready(function() {
+    // 1. Плавний скролл
+    $('a[href*="#"]').on('click', function(e) {
+        if ($(this.hash).length) {
+            e.preventDefault();
+            $('html, body').animate({
+                scrollTop: $(this.hash).offset().top - 70
+            }, 800);
+        }
     });
-  }
+
+    // 3. Ефекти при наведенні
+    $('.smooth-hover').hover(
+        function() { $(this).css('transform', 'scale(1.05)'); },
+        function() { $(this).css('transform', 'scale(1)'); }
+    );
+
+    // 4. Робота з формою (ОНОВЛЕНО)
+    $('#feedbackForm').submit(function(e) {
+        e.preventDefault();
+        let valid = true;
+
+        // Валідація (залишаємо як було)
+        if (!$('#name').val().trim()) {
+            $('#nameError').text('Будь ласка, введіть ім\'я').show();
+            valid = false;
+        }
+        const email = $('#email').val().trim();
+        if (!email) {
+            $('#emailError').text('Будь ласка, введіть email').show();
+            valid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            $('#emailError').text('Введіть коректний email').show();
+            valid = false;
+        }
+        if (!$('#message').val().trim()) {
+            $('#messageError').text('Будь ласка, введіть повідомлення').show();
+            valid = false;
+        }
+
+        if (valid) {
+            $('.loading').show();
+            $('#submitBtn').prop('disabled', true);
+
+            // ВІДПРАВКА НА НОВИЙ API (замість Firebase)
+            fetch("http://localhost:3000/api/comments", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json" 
+                },
+                body: JSON.stringify({
+                    name: $('#name').val().trim(),
+                    email: email,
+                    message: $('#message').val().trim()
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Помилка сервера");
+                return response.json();
+            })
+            .then(() => {
+                $('.loading').hide();
+                $('#feedbackForm').slideUp(300);
+                $('#successMessage')
+                    .html('<strong>Дякуємо!</strong> Ваш коментар успішно додано!')
+                    .slideDown(300);
+                $('#feedbackForm')[0].reset();
+                $('#submitBtn').prop('disabled', false);
+                loadComments(); // Оновлюємо коментарі
+            })
+            .catch((error) => {
+                console.error("Помилка: ", error);
+                $('.loading').hide();
+                $('#successMessage')
+                    .html('<strong>Помилка!</strong> Спробуйте ще раз пізніше.')
+                    .show();
+                $('#submitBtn').prop('disabled', false);
+            });
+        }
+    });
+
+    // 5. Додаткові ефекти
+    $('.my-photo').on('click', function() {
+        $(this).toggleClass('zoom');
+    });
+
+    // 6. Анімація заголовка
+    $('h1').hide().fadeIn(1000);
 });
 
-        // 5. Додаткові ефекти
-        $('.my-photo').on('click', function() {
-            $(this).toggleClass('zoom');
+// НОВА ФУНКЦІЯ ДЛЯ ЗАВАНТАЖЕННЯ КОМЕНТАРІВ З API
+function loadComments() {
+    fetch("http://localhost:3000/api/comments")
+        .then(response => {
+            if (!response.ok) throw new Error("Помилка завантаження");
+            return response.json();
+        })
+        .then(comments => {
+            let commentsHTML = "";
+            if (comments.length === 0) {
+                commentsHTML = "<p>Ще немає коментарів. Будьте першим!</p>";
+            } else {
+                comments.forEach(comment => {
+                    commentsHTML += `
+                        <div class="comment">
+                            <strong>${comment.name}</strong>
+                            <p>${comment.message}</p>
+                            <small>${new Date(comment.timestamp).toLocaleString('uk-UA')}</small>
+                        </div>
+                    `;
+                });
+            }
+            $('#commentsList').html(commentsHTML);
+        })
+        .catch(error => {
+            console.error("Помилка завантаження коментарів:", error);
+            $('#commentsList').html("<p>Не вдалося завантажити коментарі. Спробуйте оновити сторінку.</p>");
         });
-
-        // 6. Анімація заголовка
-        $('h1').hide().fadeIn(1000);
-    });
-    function loadComments() {
-  db.collection("comments")
-    .orderBy("timestamp", "desc") // Сортировка от новых к старым
-    .get()
-    .then((querySnapshot) => {
-      let commentsHTML = "";
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        commentsHTML += `
-          <div class="comment">
-            <strong>${data.name}</strong>
-            <p>${data.message}</p>
-            <small>${data.timestamp?.toDate().toLocaleString() || "сьогодні"}</small>
-          </div>
-        `;
-      });
-      $('#commentsList').html(commentsHTML || "<p>Ще немає коментарів. Будьте першим!</p>");
-    });
 }
 
-// Загружаем комменты при загрузке страницы
+// Завантажуємо коментарі при завантаженні сторінки
 $(document).ready(function() {
-  loadComments();
+    loadComments();
 });
-    </script>
+</script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<script>
-  // Ваш конфіг Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyDeu_gOe05cR8o0lCu48UPm-ejfAFjs48Q",
-    authDomain: "mancity-fan-site-b0833.firebaseapp.com",
-    projectId: "mancity-fan-site-b0833",
-    storageBucket: "mancity-fan-site-b0833.appspot.com",  // Виправлено (без .firebasestorage)
-    messagingSenderId: "617244974554",
-    appId: "1:617244974554:web:9640979ae18e4f5139f4e3"
-  };
 
-  // Ініціалізація Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();  // Доступ до Firestore
-</script>
 </body>
 </html>
