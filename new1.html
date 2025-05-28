@@ -8,6 +8,10 @@
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
 
     <style>
+        #scrollToTopBtn:hover {
+    background-color: #51cf66;
+    transform: scale(1.1);
+}
         .loader {
             position: fixed;
             top: 0;
@@ -212,6 +216,27 @@ $(document).ready(function() {
         });
     }, 1500);
 });
+</script>
+<button id="scrollToTopBtn" title="Нагору" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99; border: none; outline: none; background-color: #1f235a; color: white; cursor: pointer; padding: 15px; border-radius: 50%; font-size: 18px; transition: all 0.3s ease;">↑</button>
+
+<script>
+    // Кнопка "Нагору"
+    $(document).ready(function() {
+        const scrollToTopBtn = $('#scrollToTopBtn');
+        
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 300) {
+                scrollToTopBtn.fadeIn();
+            } else {
+                scrollToTopBtn.fadeOut();
+            }
+        });
+        
+        scrollToTopBtn.click(function() {
+            $('html, body').animate({scrollTop: 0}, 800);
+            return false;
+        });
+    });
 </script>
 </body>
 </html>
