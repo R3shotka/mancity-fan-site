@@ -11,6 +11,10 @@
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
     <style>
         /* Додаткові стилі для jQuery */
+        #scrollToTopBtn:hover {
+    background-color: #51cf66;
+    transform: scale(1.1);
+}
         .form-success {
             display: none;
             background-color: #51cf66;
@@ -150,70 +154,104 @@
             function() { $(this).css('transform', 'scale(1)'); }
         );
 
-        // Оновлена робота з формою
-        $('#feedbackForm').submit(function(e) {
-            e.preventDefault();
-            let valid = true;
+       // Оновлена робота з формою
+$('#feedbackForm').submit(function(e) {
+    e.preventDefault();
+    let valid = true;
 
-            // Валідація (залишаємо як було)
-            if (!$('#name').val().trim()) {
-                $('#nameError').text('Будь ласка, введіть ім\'я').show();
-                valid = false;
-            }
-            const email = $('#email').val().trim();
-            if (!email) {
-                $('#emailError').text('Будь ласка, введіть email').show();
-                valid = false;
-            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                $('#emailError').text('Введіть коректний email').show();
-                valid = false;
-            }
-            if (!$('#message').val().trim()) {
-                $('#messageError').text('Будь ласка, введіть повідомлення').show();
-                valid = false;
-            }
+    // Валідація імені
+    const name = $('#name').val().trim();
+    if (!name) {
+        $('#nameError').text('Будь ласка, введіть ім\'я').show();
+        valid = false;
+    } else if (name.length < 2) {
+        $('#nameError').text('Ім\'я має містити щонайменше 2 літери').show();
+        valid = false;
+    } else if (/[0-9!@#$%^&*(),.?":{}|<>]/.test(name)) {
+        $('#nameError').text('Ім\'я не може містити цифри чи спецсимволи').show();
+        valid = false;
+    }
 
-            if (valid) {
-                $('.loading').show();
-                $('#submitBtn').prop('disabled', true);
+    // Валідація email
+    const email = $('#email').val().trim();
+    if (!email) {
+        $('#emailError').text('Будь ласка, введіть email').show();
+        valid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        $('#emailError').text('Введіть коректний email').show();
+        valid = false;
+    } else if (/(@mail\.ru|@ru$|\.ru$|mail\.ru$)/i.test(email)) {
+        $('#emailError').text('Будь ласка, використовуйте інший поштовий сервіс').show();
+        valid = false;
+    }
 
-                // Оновлений URL для Render
-                fetch("https://mancity-fan-site.onrender.com/api/comments", {
-                    method: "POST",
-                    headers: { 
-                        "Content-Type": "application/json" 
-                    },
-                    body: JSON.stringify({
-                        name: $('#name').val().trim(),
-                        email: email,
-                        message: $('#message').val().trim()
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error("Помилка сервера");
-                    return response.json();
-                })
-                .then(() => {
-                    $('.loading').hide();
-                    $('#feedbackForm').slideUp(300);
-                    $('#successMessage')
-                        .html('<strong>Дякуємо!</strong> Ваш коментар успішно додано!')
-                        .slideDown(300);
-                    $('#feedbackForm')[0].reset();
-                    $('#submitBtn').prop('disabled', false);
-                    loadComments();
-                })
-                .catch((error) => {
-                    console.error("Помилка: ", error);
-                    $('.loading').hide();
-                    $('#successMessage')
-                        .html('<strong>Помилка!</strong> Спробуйте ще раз пізніше.')
-                        .show();
-                    $('#submitBtn').prop('disabled', false);
-                });
-            }
+    // Валідація повідомлення
+    if (!$('#message').val().trim()) {
+        $('#messageError').text('Будь ласка, введіть повідомлення').show();
+        valid = false;
+    }
+
+    if (valid) {
+        // Решта коду відправки форми залишається без змін
+        $('.loading').show();
+        $('#submitBtn').prop('disabled', true);
+
+        fetch("https://mancity-fan-site.onrender.com/api/comments", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json" 
+            },
+            body: JSON.stringify({
+                name: $('#name').val().trim(),
+                email: email,
+                message: $('#message').val().trim()
+            })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Помилка сервера");
+            return response.json();
+        })
+        .then(() => {
+            $('.loading').hide();
+            $('#feedbackForm').slideUp(300);
+            $('#successMessage')
+                .html('<strong>Дякуємо!</strong> Ваш коментар успішно додано!')
+                .slideDown(300);
+            $('#feedbackForm')[0].reset();
+            $('#submitBtn').prop('disabled', false);
+            loadComments();
+        })
+        .catch((error) => {
+            console.error("Помилка: ", error);
+            $('.loading').hide();
+            $('#successMessage')
+                .html('<strong>Помилка!</strong> Спробуйте ще раз пізніше.')
+                .show();
+            $('#submitBtn').prop('disabled', false);
         });
+    }
+});
 
+// Додаємо обробники подій для приховування помилок при введенні
+$('#name').on('input', function() {
+    const name = $(this).val().trim();
+    if (name.length >= 2 && !/[0-9!@#$%^&*(),.?":{}|<>]/.test(name)) {
+        $('#nameError').hide();
+    }
+});
+
+$('#email').on('input', function() {
+    const email = $(this).val().trim();
+    if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && !/(@mail\.ru|@ru$|\.ru$|mail\.ru$)/i.test(email)) {
+        $('#emailError').hide();
+    }
+});
+
+$('#message').on('input', function() {
+    if ($(this).val().trim()) {
+        $('#messageError').hide();
+    }
+});
         // Додаткові ефекти (залишаємо без змін)
         $('.my-photo').on('click', function() {
             $(this).toggleClass('zoom');
@@ -260,7 +298,47 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<button id="scrollToTopBtn" title="Нагору" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99; border: none; outline: none; background-color: #1f235a; color: white; cursor: pointer; padding: 15px; border-radius: 50%; font-size: 18px; transition: all 0.3s ease;">↑</button>
 
+<script>
+    // Кнопка "Нагору"
+    $(document).ready(function() {
+        const scrollToTopBtn = $('#scrollToTopBtn');
+        
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 300) {
+                scrollToTopBtn.fadeIn();
+            } else {
+                scrollToTopBtn.fadeOut();
+            }
+        });
+        
+        scrollToTopBtn.click(function() {
+            $('html, body').animate({scrollTop: 0}, 800);
+            return false;
+        });
+    });
+</script>
+<button id="scrollToTopBtn" title="Нагору" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99; border: none; outline: none; background-color: #1f235a; color: white; cursor: pointer; padding: 15px; border-radius: 50%; font-size: 18px; transition: all 0.3s ease;">↑</button>
 
+<script>
+    // Кнопка "Нагору"
+    $(document).ready(function() {
+        const scrollToTopBtn = $('#scrollToTopBtn');
+        
+        $(window).scroll(function() {
+            if ($(this).scrollTop() > 300) {
+                scrollToTopBtn.fadeIn();
+            } else {
+                scrollToTopBtn.fadeOut();
+            }
+        });
+        
+        scrollToTopBtn.click(function() {
+            $('html, body').animate({scrollTop: 0}, 800);
+            return false;
+        });
+    });
+</script>
 </body>
 </html>
